@@ -1,0 +1,6 @@
+udp.ip=
+udp.port=
+udp.size.receive=
+file.req.prefix=
+file.protocol.split=
+file.protocol.end=

@@ -1,5 +1,6 @@
 
 # User-specific stuff
+src/main/resources/config.properties
 .idea/
 .idea/**/workspace.xml
 .idea/**/tasks.xml
