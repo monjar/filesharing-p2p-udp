@@ -3,7 +3,7 @@ package receiver;
 import config.ConfigLoader;
 import config.Configs;
 import file.FileHandler;
-import modes.ClientModes;
+import modes.ClientMode;
 import util.DataHelpers;
 
 import java.io.IOException;
@@ -11,34 +11,39 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class Receiver {
+public class Receiver implements ClientMode {
 
     private static String UDP_IP;
     private static int UDP_PORT;
     private static int RECEIVE_SIZE;
     private static String REQUEST_PREFIX;
-
-    public Receiver() {
+    private final String fileName;
+    public Receiver( String fileName) {
         ConfigLoader configLoader = new ConfigLoader("config.properties");
         configLoader.load();
         UDP_IP = Configs.getStr("udp.ip.broadcast");
         UDP_PORT = Configs.getInt("udp.port");
         RECEIVE_SIZE = Configs.getInt("udp.size.receive");
         REQUEST_PREFIX = Configs.getStr("file.req.prefix");
-
+        this.fileName = fileName;
     }
 
-    public String receiveFile(String file) throws IOException {
-        return receiveFile(file, ClientModes.Receiver.DOWNLOAD);
+    @Override
+    public void startMode()throws IOException {
+        receiveFile();
     }
 
-    public String receiveFile(String file, ClientModes.Receiver receiverMode) throws IOException {
+    public String receiveFile() throws IOException {
+        return receiveFile(ClientMode.Receiver.DOWNLOAD);
+    }
+
+    public String receiveFile(ClientMode.Receiver receiverMode) throws IOException {
         DatagramSocket udpSocket = new DatagramSocket();
-        requestFileFromOthers(file, udpSocket);
-        if (receiverMode == ClientModes.Receiver.METADATA)
+        requestFileFromOthers(fileName, udpSocket);
+        if (receiverMode == ClientMode.Receiver.METADATA)
             return getFileMetaData(udpSocket);
         else
-            return downloadFile(udpSocket, file);
+            return downloadFile(udpSocket, fileName);
 
     }
 

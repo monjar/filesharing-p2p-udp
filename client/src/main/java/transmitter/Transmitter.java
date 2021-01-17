@@ -3,6 +3,7 @@ package transmitter;
 import config.ConfigLoader;
 import config.Configs;
 import file.FileHandler;
+import modes.ClientMode;
 import util.DataHelpers;
 
 import java.io.IOException;
@@ -10,33 +11,39 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class Transmitter {
+public class Transmitter implements ClientMode {
 
     private static String UDP_IP_LISTEN;
     private static int UDP_PORT;
     private static int RECEIVE_SIZE;
     private static String REQUEST_PREFIX;
     private boolean isServing = true;
+    private String fileName = "";
+    @Override
+    public void startMode() throws IOException {
+        serveFile();
+    }
 
-    public Transmitter() {
+    public Transmitter(String fileName ) {
         ConfigLoader configLoader = new ConfigLoader("config.properties");
         configLoader.load();
         UDP_IP_LISTEN = Configs.getStr("udp.ip.listen");
         UDP_PORT = Configs.getInt("udp.port");
         RECEIVE_SIZE = Configs.getInt("udp.size.receive");
         REQUEST_PREFIX = Configs.getStr("file.req.prefix");
+        this.fileName = fileName;
     }
 
-    public void serveFile(String file) throws IOException {
-        FileHandler fileHandler = new FileHandler(file);
+    public void serveFile() throws IOException {
+        FileHandler fileHandler = new FileHandler(fileName);
         DatagramSocket socket = new DatagramSocket(UDP_PORT, InetAddress.getByName(UDP_IP_LISTEN));
         byte[] buf = new byte[RECEIVE_SIZE];
         DatagramPacket packet = new DatagramPacket(buf, 0, buf.length);
         while (isServing) {
-            waitForValidRequest(file, socket, buf, packet);
+            waitForValidRequest(fileName, socket, buf, packet);
             int destPort = packet.getPort();
             InetAddress destIp = packet.getAddress();
-            UploadHandler handler = new UploadHandler(file, fileHandler, socket, destIp, destPort);
+            UploadHandler handler = new UploadHandler(fileName, fileHandler, socket, destIp, destPort);
             handler.start();
         }
 //        socket.close();

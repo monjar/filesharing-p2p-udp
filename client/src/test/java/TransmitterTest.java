@@ -1,5 +1,4 @@
 import file.FileHandler;
-import modes.ClientModes;
 import org.junit.Test;
 import receiver.Receiver;
 import transmitter.Transmitter;
@@ -14,17 +13,17 @@ public class TransmitterTest {
     @Test
     public void transmitDataCheck() throws Exception {
         Thread thread = new Thread(() -> {
-            Transmitter t = new Transmitter();
+            Transmitter t = new Transmitter("uploadable-files/aaa.png");
             try {
-                t.serveFile("uploadable-files/aaa.png");
+                t.serveFile();
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
         });
         thread.start();
         Thread.sleep(100);
-        Receiver r = new Receiver();
-        r.receiveFile("aaa.png");
+        Receiver r = new Receiver("aaa.png");
+        r.receiveFile();
 
         FileHandler fileHandler1 = new FileHandler("uploadable-files/aaa.png");
         FileHandler fileHandler2 = new FileHandler("uploadable-files/aaa.png");

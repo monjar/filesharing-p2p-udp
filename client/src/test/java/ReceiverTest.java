@@ -1,14 +1,13 @@
 import config.ConfigLoader;
 import config.Configs;
 import file.FileHandler;
-import modes.ClientModes;
+import modes.ClientMode;
 import org.junit.Test;
 import receiver.Receiver;
 import util.DataHelpers;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 
@@ -30,12 +29,11 @@ public class ReceiverTest {
     }
 
 
-
     @Test
     public void receiverMetaData() {
         try {
 
-            final Receiver receiver = new Receiver();
+            final Receiver receiver = new Receiver("hi.txt");
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     try {
@@ -59,7 +57,7 @@ public class ReceiverTest {
             });
             t.start();
             Thread.sleep(100);
-            receiver.receiveFile("hi.txt", ClientModes.Receiver.METADATA);
+            receiver.receiveFile(ClientMode.Receiver.METADATA);
 
 
         } catch (Exception e) {
@@ -72,7 +70,7 @@ public class ReceiverTest {
     public void receiverDownloadFile() {
         try {
 
-            final Receiver receiver = new Receiver();
+            final Receiver receiver = new Receiver("test.txt");
             final String data = "This is \ndata of the @@@data@@@data file.";
             Thread t = new Thread(new Runnable() {
                 public void run() {
@@ -99,7 +97,7 @@ public class ReceiverTest {
             });
             t.start();
             Thread.sleep(100);
-            receiver.receiveFile("test.txt", ClientModes.Receiver.DOWNLOAD);
+            receiver.receiveFile(ClientMode.Receiver.DOWNLOAD);
             FileHandler fileHandler2 = new FileHandler("test.txt");
             byte[] actual = fileHandler2.readByteFromFile(0, (int) fileHandler2.sizeInBytes());
             assertEquals(data, DataHelpers.parseBytes(actual));
