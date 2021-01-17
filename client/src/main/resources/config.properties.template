@@ -6,3 +6,4 @@ udp.size.packet=
 file.req.prefix=
 file.protocol.split=
 file.protocol.end=
+test.prop=test

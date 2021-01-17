@@ -2,7 +2,7 @@ package modes;
 
 public interface ClientModes {
     enum Receiver{
-        SEARCH, DOWNLOAD
+        METADATA, DOWNLOAD
     }
     enum TRANSMITTER{
         UPLOAD

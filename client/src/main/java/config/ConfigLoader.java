@@ -17,14 +17,11 @@ public class ConfigLoader {
     public String load() {
         try (InputStream input = getClass().getClassLoader().getResourceAsStream(filename)) {
             Properties prop = new Properties();
-            if (input == null)
-                throw new ConfigFileNotFoundException();
             prop.load(input);
             prop.forEach((key, value) -> Configs.put((String) key, (String) value));
             return Configs.getConfigString();
-        } catch (IOException ex) {
-            System.err.println(ex.getMessage());
-            return "File not found";
+        } catch (Exception ex) {
+            throw new ConfigFileNotFoundException();
         }
     }
 

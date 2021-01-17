@@ -10,12 +10,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collector;
 
 public class Receiver {
 
@@ -41,38 +35,31 @@ public class Receiver {
     public String receiveFile(String file, ClientModes.Receiver receiverMode) throws IOException {
         DatagramSocket udpSocket = new DatagramSocket();
         requestFileFromOthers(file, udpSocket);
-        if (receiverMode == ClientModes.Receiver.SEARCH)
-            return searchForFile(udpSocket);
+        if (receiverMode == ClientModes.Receiver.METADATA)
+            return getFileMetaData(udpSocket);
         else
             return downloadFile(udpSocket, file);
 
     }
 
     private String downloadFile(DatagramSocket udpSocket, String fileName) throws IOException {
-        String searchResult = searchForFile(udpSocket);
-        int fileSize = Integer.parseInt(searchResult.split("- size: ")[1]);
-        System.out.println("SIZE: " + fileSize);
-        int downloadedBytes = 0;
-        byte[] receive_bytes = new byte[RECEIVE_SIZE];
+        String searchResult = getFileMetaData(udpSocket);
+        int fileSize = Integer.parseInt(searchResult.split("- size: ")[1]), downloadedBytes = 0;
         FileHandler fileHandler = new FileHandler(fileName, true);
         while (fileSize != downloadedBytes) {
             int currentBufferSize = Math.min(RECEIVE_SIZE, fileSize - downloadedBytes);
-            receive_bytes = new byte[currentBufferSize];
+            byte[] receive_bytes = new byte[currentBufferSize];
             downloadedBytes += currentBufferSize;
-//            System.out.print( "\r"+downloadedBytes+"/"+fileSize );
             DatagramPacket receivePacket = new DatagramPacket(receive_bytes, receive_bytes.length);
             udpSocket.receive(receivePacket);
             fileHandler.writeToFile(receive_bytes, true);
         }
         fileHandler.closeWriter();
-        if(downloadedBytes == fileSize)
-            return "File downloaded completely";
-        else
-            return "Couldn't download file completely";
+        return "File downloaded completely";
     }
 
 
-    private String searchForFile(DatagramSocket udpSocket) throws IOException {
+    private String getFileMetaData(DatagramSocket udpSocket) throws IOException {
         byte[] receive_bytes = new byte[RECEIVE_SIZE];
         DatagramPacket receivePacket = new DatagramPacket(receive_bytes, receive_bytes.length);
         udpSocket.receive(receivePacket);

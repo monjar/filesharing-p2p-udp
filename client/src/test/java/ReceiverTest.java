@@ -29,14 +29,10 @@ public class ReceiverTest {
         PACKET_SIZE = Configs.getInt("udp.size.packet");
     }
 
-    @Test
-    public void parseData() {
-        String s1 = " THis is a string for testing parse. \n still testing...";
-        assertEquals(s1, DataHelpers.parseBytes(s1.getBytes(StandardCharsets.UTF_8)));
-    }
+
 
     @Test
-    public void receiverSearch() {
+    public void receiverMetaData() {
         try {
 
             final Receiver receiver = new Receiver();
@@ -63,7 +59,7 @@ public class ReceiverTest {
             });
             t.start();
             Thread.sleep(100);
-            receiver.receiveFile("hi.txt", ClientModes.Receiver.SEARCH);
+            receiver.receiveFile("hi.txt", ClientModes.Receiver.METADATA);
 
 
         } catch (Exception e) {

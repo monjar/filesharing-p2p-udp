@@ -27,7 +27,7 @@ public class FileHandler {
         return path.substring(0, path.length() - split[split.length - 1].length() - 1) + filePostFix + "." + split[split.length - 1];
     }
 
-    public void writeToFile(byte[] input, boolean append) {
+    public synchronized void writeToFile(byte[] input, boolean append) {
         try {
 
             f.write(input);
@@ -48,7 +48,7 @@ public class FileHandler {
         return this.file.length();
     }
 
-    public byte[] readByteFromFile(int start, int offset) {
+    public synchronized byte[] readByteFromFile(int start, int offset) {
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "r");
             raf.seek(start);
