@@ -1,23 +1,40 @@
-package receiver;
-
 import config.ConfigLoader;
 import config.Configs;
+import file.FileHandler;
 import modes.ClientModes;
 import org.junit.Test;
+import receiver.Receiver;
 import util.DataHelpers;
 
 import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 
 public class ReceiverTest {
+    private static String UDP_IP_LISTEN;
+    private static int UDP_PORT;
+    private static int RECEIVE_SIZE;
+    private static int PACKET_SIZE;
+    private static String REQUEST_PREFIX;
+
+    public ReceiverTest() {
+        ConfigLoader configLoader = new ConfigLoader("config.properties");
+        configLoader.load();
+        UDP_IP_LISTEN = Configs.getStr("udp.ip.listen");
+        UDP_PORT = Configs.getInt("udp.port");
+        RECEIVE_SIZE = Configs.getInt("udp.size.receive");
+        REQUEST_PREFIX = Configs.getStr("file.req.prefix");
+        PACKET_SIZE = Configs.getInt("udp.size.packet");
+    }
 
     @Test
-    public void parseData(){
+    public void parseData() {
         String s1 = " THis is a string for testing parse. \n still testing...";
-        assertEquals(s1, DataHelpers.parseBytes(s1.getBytes()));
+        assertEquals(s1, DataHelpers.parseBytes(s1.getBytes(StandardCharsets.UTF_8)));
     }
+
     @Test
     public void receiverSearch() {
         try {
@@ -26,13 +43,13 @@ public class ReceiverTest {
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        DatagramSocket socket = new DatagramSocket(8081, InetAddress.getByName("0.0.0.0"));
-                        byte[] buf = new byte[100];
+                        DatagramSocket socket = new DatagramSocket(UDP_PORT, InetAddress.getByName(UDP_IP_LISTEN));
+                        byte[] buf = new byte[RECEIVE_SIZE];
                         DatagramPacket packet = new DatagramPacket(buf, 0, buf.length);
                         socket.receive(packet);
                         String req_file = DataHelpers.parseBytes(buf);
-                        assertEquals(req_file, "Get :hi.txt");
-                        buf = "FOUND TEST CLIENT".getBytes();
+                        assertEquals(req_file, REQUEST_PREFIX + "hi.txt");
+                        buf = "FOUND TEST CLIENT".getBytes(StandardCharsets.UTF_8);
                         packet = new DatagramPacket(buf, 0, buf.length, packet.getAddress(), packet.getPort());
                         socket.send(packet);
                         socket.close();
@@ -64,23 +81,18 @@ public class ReceiverTest {
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        DatagramSocket socket = new DatagramSocket(8081, InetAddress.getByName("0.0.0.0"));
-                        byte[] buf = new byte[100];
+                        DatagramSocket socket = new DatagramSocket(UDP_PORT, InetAddress.getByName(UDP_IP_LISTEN));
+                        byte[] buf = new byte[RECEIVE_SIZE];
                         DatagramPacket packet = new DatagramPacket(buf, 0, buf.length);
-                        System.out.println("Waiting for packet...");
                         socket.receive(packet);
                         String req_file = DataHelpers.parseBytes(buf);
-                        System.out.println("Request:" + req_file);
-
-                        for (int i = 0; i < Math.ceil(data.length() / 8f); i++) {
-                            String line = "Index:" + (i) + "@@@data:" + data.substring(i * 8, Math.min((i + 1) * 8, data.length()));
-                            byte[] buf2 = line.getBytes();
-                            DatagramPacket ppacket = new DatagramPacket(buf2, 0, buf2.length, packet.getAddress(), packet.getPort());
-                            socket.send(ppacket);
-                        }
-                        buf = "#EOF#".getBytes();
+                        buf = ("FOUND FILE " + "test.txt" + " - size: " + data.length()).getBytes();
                         packet = new DatagramPacket(buf, 0, buf.length, packet.getAddress(), packet.getPort());
                         socket.send(packet);
+                        byte[] buf2 = data.getBytes();
+                        DatagramPacket ppacket = new DatagramPacket(buf2, 0, buf2.length, packet.getAddress(), packet.getPort());
+                        socket.send(ppacket);
+
                         socket.close();
 
                     } catch (Exception e) {
@@ -91,8 +103,10 @@ public class ReceiverTest {
             });
             t.start();
             Thread.sleep(100);
-            String returnValue = receiver.receiveFile("hi.txt", ClientModes.Receiver.DOWNLOAD);
-            assertEquals(data, returnValue);
+            receiver.receiveFile("test.txt", ClientModes.Receiver.DOWNLOAD);
+            FileHandler fileHandler2 = new FileHandler("test.txt");
+            byte[] actual = fileHandler2.readByteFromFile(0, (int) fileHandler2.sizeInBytes());
+            assertEquals(data, DataHelpers.parseBytes(actual));
 
         } catch (Exception e) {
             e.printStackTrace();

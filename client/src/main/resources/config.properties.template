@@ -1,6 +1,8 @@
-udp.ip=
+udp.ip.listen=
+udp.ip.broadcast=
 udp.port=
 udp.size.receive=
+udp.size.packet=
 file.req.prefix=
 file.protocol.split=
 file.protocol.end=

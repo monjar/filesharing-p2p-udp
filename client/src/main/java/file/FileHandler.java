@@ -1,24 +1,23 @@
 package file;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import util.DataHelpers;
+
+import java.io.*;
 
 public class FileHandler {
     private File file;
+    FileOutputStream f;
 
     public FileHandler(String path) {
-        file = new File(path);
+        this(path, false);
+
+    }
+
+    public FileHandler(String path, boolean create) {
         try {
-            int filePostFix = 0;
-            while (file.exists()) {
-                filePostFix++;
-                String[] split = path.split("\\.");
-                String fileName = getPlusOneName(path, split, filePostFix);
-                file = new File(fileName);
-            }
-            if (file.createNewFile())
-                System.out.println("Created file: " + file.getName());
+            file = new File(path);
+            if (create)
+                f = new FileOutputStream(file);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -28,18 +27,42 @@ public class FileHandler {
         return path.substring(0, path.length() - split[split.length - 1].length() - 1) + filePostFix + "." + split[split.length - 1];
     }
 
-    public void writeToFile(String input, boolean append) {
+    public void writeToFile(byte[] input, boolean append) {
         try {
 
-            FileWriter writer = new FileWriter(file);
-            if (append)
-                writer.append(input);
-            else
-                writer.write(input);
+            f.write(input);
 
-            writer.close();
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
     }
+    public void closeWriter(){
+        try {
+            f.close();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    public long sizeInBytes() {
+        return this.file.length();
+    }
+
+    public byte[] readByteFromFile(int start, int offset) {
+        try {
+            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            raf.seek(start);
+            if (offset >= this.file.length() || start + offset >= this.file.length())
+                offset = (int) this.file.length() - start;
+
+            byte[] buffer = new byte[offset];
+            raf.readFully(buffer);
+            return buffer;
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+            return null;
+        }
+    }
+
+
 }
