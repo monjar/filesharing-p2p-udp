@@ -6,7 +6,7 @@ public class DataHelpers {
             return null;
         StringBuilder ret = new StringBuilder();
         int i = 0;
-        while (a[i] != 0) {
+        while (a.length > i && a[i] != 0) {
             ret.append((char) a[i]);
             i++;
         }

@@ -13,7 +13,11 @@ import java.net.*;
 
 public class ReceiverTest {
 
-
+    @Test
+    public void parseData(){
+        String s1 = " THis is a string for testing parse. \n still testing...";
+        assertEquals(s1, DataHelpers.parseBytes(s1.getBytes()));
+    }
     @Test
     public void receiverSearch() {
         try {

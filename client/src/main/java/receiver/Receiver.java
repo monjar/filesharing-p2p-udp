@@ -2,6 +2,7 @@ package receiver;
 
 import config.ConfigLoader;
 import config.Configs;
+import file.FileHandler;
 import modes.ClientModes;
 import util.DataHelpers;
 
@@ -18,8 +19,7 @@ public class Receiver {
     private static String REQUEST_PREFIX;
     private static String DATA_SPLITTER;
     private static String END_IDENTIFIER;
-
-    Receiver() {
+    public Receiver() {
         ConfigLoader configLoader = new ConfigLoader("config.properties");
         configLoader.load();
         UDP_IP = Configs.getStr("udp.ip");
@@ -28,6 +28,7 @@ public class Receiver {
         REQUEST_PREFIX = Configs.getStr("file.req.prefix");
         DATA_SPLITTER = Configs.getStr("file.protocol.split");
         END_IDENTIFIER = Configs.getStr("file.protocol.end");
+
     }
 
     public String receiveFile(String file, ClientModes.Receiver receiverMode) throws IOException {
@@ -37,21 +38,21 @@ public class Receiver {
         if (receiverMode == ClientModes.Receiver.SEARCH)
             return searchForFile(udpSocket);
         else
-            return downloadFile(udpSocket);
+            return downloadFile(udpSocket,file);
 
     }
 
-    private String downloadFile(DatagramSocket udpSocket) throws IOException {
+    private String downloadFile(DatagramSocket udpSocket,String fileName) throws IOException {
         StringBuilder dataBuilder = new StringBuilder();
         byte[] receive_bytes = new byte[RECEIVE_SIZE];
+        FileHandler fileHandler = new FileHandler(fileName);
         while (dataIsComing(receive_bytes)) {
             receive_bytes = new byte[RECEIVE_SIZE];
             String[] split = downloadNewPacket(udpSocket, receive_bytes);
             String indexString = split[0];
             appendToPreviousData(dataBuilder, split);
+            fileHandler.writeToFile(dataBuilder.toString(), true);
         }
-        System.out.println("Downloaded data: " + dataBuilder.toString());
-        //TODO: write to file
         return dataBuilder.toString();
     }
 
