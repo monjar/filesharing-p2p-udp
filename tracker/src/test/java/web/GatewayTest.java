@@ -2,7 +2,8 @@ package web;
 
 import controller.Controller;
 import controller.NodeController;
-import dto.NodeListDto;
+import database.DatabaseConnector;
+import database.model.Node;
 import exceptions.InvalidRequestMethodException;
 import gateway.Server;
 import org.junit.Test;
@@ -23,7 +24,7 @@ public class GatewayTest {
         Request request = new Request();
         request.setBody(null);
         request.setMethod(RequestMethod.GET);
-        request.setTargetRoute("all");
+        request.setTargetRoute("/");
         controller.handleRequest(request);
     }
 
@@ -34,7 +35,7 @@ public class GatewayTest {
         Request request = new Request();
         request.setBody(null);
         request.setMethod(RequestMethod.UPDATE);
-        request.setTargetRoute("all");
+        request.setTargetRoute("/");
         controller.handleRequest(request);
     }
 
@@ -43,13 +44,21 @@ public class GatewayTest {
         try {Server s = new Server();
             Thread t = new Thread(()->{
                 try {
+                    DatabaseConnector.getInstance().clear(Node.class);
                     Thread.sleep(100);
                     Socket socket = new Socket("localhost", 2021);
                     DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                     DataInputStream dis = new DataInputStream(socket.getInputStream());
-                    dos.writeUTF("{\"method\":\"GET\", \"targetRoute\":\"all\", \"body\":null}");
+                    dos.writeUTF("{\"method\":\"ADD\", \"targetRoute\":\"/\", \"body\":{\"address\":\"addressTest0\"}}");
                     String response = dis.readUTF();
-                    assertEquals(response, "{}");
+                    assertEquals("{\"data\":\"addressTest0\"}",response );
+
+                    socket = new Socket("localhost", 2021);
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    dis = new DataInputStream(socket.getInputStream());
+                    dos.writeUTF("{\"method\":\"GET\", \"targetRoute\":\"/\", \"body\":null}");
+                     response = dis.readUTF();
+                    assertEquals("{\"nodeList\":[{\"address\":\"addressTest0\",\"servedFiles\":[],\"downloadedFilesCount\":0,\"uploadedFilesCount\":0}]}",response );
                     s.stop();
                 } catch (Exception e) {
                     e.printStackTrace();

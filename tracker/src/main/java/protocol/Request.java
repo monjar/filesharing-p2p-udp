@@ -1,9 +1,12 @@
 package protocol;
 
-public  class Request {
+import java.io.Serializable;
+import java.util.Map;
+
+public  class Request implements Serializable {
     private RequestMethod method;
     private String targetRoute;
-    private RequestBody body;
+    private Map body;
 
 
     public RequestMethod getMethod() {
@@ -22,11 +25,11 @@ public  class Request {
         this.targetRoute = targetRoute;
     }
 
-    public RequestBody getBody() {
+    public Map getBody() {
         return body;
     }
 
-    public void setBody(RequestBody body) {
+    public void setBody(Map body) {
         this.body = body;
     }
 

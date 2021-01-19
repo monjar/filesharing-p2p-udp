@@ -36,10 +36,11 @@ public abstract class Controller {
                 return false;
         }).findAny();
         try {
-            return (Response) requestedMethod.orElseThrow(() -> new RouteNotFoundException(request.getTargetRoute())).invoke(this);
+            Method m = requestedMethod.orElseThrow(() -> new RouteNotFoundException(request.getTargetRoute()));
+            return (Response) m.invoke(this, request);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-        throw new RouteNotFoundException(request.getTargetRoute());
+        return null;
     }
 }

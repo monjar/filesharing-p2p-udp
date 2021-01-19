@@ -1,5 +1,7 @@
 package gateway;
 
+import database.DatabaseConnector;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,9 +9,12 @@ import java.net.SocketException;
 
 public class Server {
     private boolean isServerUp = true;
-
     public Server() {
-
+        try {
+            DatabaseConnector.getInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private ServerSocket serverSocket;

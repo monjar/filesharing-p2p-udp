@@ -1,15 +1,20 @@
-package model;
+package database.model;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
 public class Node implements Serializable {
 
+    public Node(String address, int downloadedFilesCount, int uploadedFilesCount) {
+        this.address = address;
+        this.downloadedFilesCount = downloadedFilesCount;
+        this.uploadedFilesCount = uploadedFilesCount;
+    }
+    public Node() {
+    }
     @Id
     private String address;
 
