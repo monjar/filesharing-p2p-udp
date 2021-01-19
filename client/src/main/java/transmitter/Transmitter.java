@@ -19,11 +19,17 @@ public class Transmitter implements ClientMode {
     private static String REQUEST_PREFIX;
     private boolean isServing = true;
     private String fileName = "";
+
+    @Override
+    public void run() {
+
+    }
+
     @Override
     public void startMode() throws IOException {
         serveFile();
     }
-
+// TODO add multiple files
     public Transmitter(String fileName ) {
         ConfigLoader configLoader = new ConfigLoader("config.properties");
         configLoader.load();

@@ -2,7 +2,7 @@ package modes;
 
 import java.io.IOException;
 
-public interface ClientMode {
+public interface ClientMode extends Runnable{
     void startMode() throws IOException;
 
     enum Receiver {
@@ -12,4 +12,5 @@ public interface ClientMode {
     enum TRANSMITTER {
         UPLOAD
     }
+
 }
