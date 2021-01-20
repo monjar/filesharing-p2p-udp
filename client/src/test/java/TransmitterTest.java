@@ -13,7 +13,8 @@ public class TransmitterTest {
     @Test
     public void transmitDataCheck() throws Exception {
         Thread thread = new Thread(() -> {
-            Transmitter t = new Transmitter("uploadable-files/aaa.png");
+            Transmitter t = new Transmitter();
+            t.addFile("aaa.png");
             try {
                 t.serveFile();
             } catch (IOException ioException) {

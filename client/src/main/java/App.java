@@ -16,9 +16,7 @@ public class App {
 
         while (true){
             TrackerConnector.getInstance().getAllData();
-            ClientMode clientMode = modeManager.getMode();
-            Thread t = new Thread(clientMode);
-            t.start();
+            modeManager.getMode();
             waitASec();
         }
 

@@ -20,9 +20,10 @@ public class UploadHandler extends Thread {
     private final int destPort;
     private final int PACKET_SIZE;
 
-    public UploadHandler(String fileName, FileHandler fileHandler, DatagramSocket socket, InetAddress destAddr, int destPort) {
+    public UploadHandler(String fileName , DatagramSocket socket, InetAddress destAddr, int destPort) {
+
+        this.fileHandler = new FileHandler(fileName);
         this.fileName = fileName;
-        this.fileHandler = fileHandler;
         this.socket = socket;
         this.destAddr = destAddr;
         this.destPort = destPort;

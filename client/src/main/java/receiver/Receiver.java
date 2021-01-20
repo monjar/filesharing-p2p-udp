@@ -33,6 +33,7 @@ public class Receiver implements ClientMode {
         this.fileName = fileName;
     }
 
+
     @Override
     public void run() {
         try {
@@ -61,9 +62,11 @@ public class Receiver implements ClientMode {
     }
 
     private String downloadFile(DatagramSocket udpSocket, String fileName) throws IOException {
+
         String searchResult = getFileMetaData(udpSocket);
+        System.out.println(searchResult);
         int fileSize = Integer.parseInt(searchResult.split("- size: ")[1]), downloadedBytes = 0;
-        FileHandler fileHandler = new FileHandler(fileName, true);
+        FileHandler fileHandler = new FileHandler("downloaded-files/" + fileName, true);
         while (fileSize > downloadedBytes) {
             int currentBufferSize = Math.min(PACKET_SIZE, fileSize - downloadedBytes) + 4;
             byte[] receive_bytes = new byte[currentBufferSize];
