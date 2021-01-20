@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 
 public class GatewayTest {
     @Test
-    public void nodeControllerGetSuccess(){
+    public void nodeControllerGetSuccess() {
         Controller controller = NodeController.getInstance();
         Request request = new Request();
         request.setBody(null);
@@ -29,7 +29,7 @@ public class GatewayTest {
     }
 
     @Test(expected = InvalidRequestMethodException.class)
-    public void nodeControllerGetBadMethod(){
+    public void nodeControllerGetBadMethod() {
 
         Controller controller = NodeController.getInstance();
         Request request = new Request();
@@ -40,25 +40,57 @@ public class GatewayTest {
     }
 
     @Test
-    public void serverNodeGetSuccessTestSuccess(){
-        try {Server s = new Server();
-            Thread t = new Thread(()->{
+    public void serverNodeGetSuccessTestSuccess() {
+        try {
+            Server s = new Server();
+            Thread t = new Thread(() -> {
                 try {
                     DatabaseConnector.getInstance().clear(Node.class);
                     Thread.sleep(100);
                     Socket socket = new Socket("localhost", 2021);
                     DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                     DataInputStream dis = new DataInputStream(socket.getInputStream());
-                    dos.writeUTF("{\"method\":\"ADD\", \"targetRoute\":\"/\", \"body\":{\"address\":\"addressTest0\"}}");
+                    dos.writeUTF("{\"method\":\"ADD\", \"targetRoute\":\"/\", \"body\":{\"address\":\"addressTest0\"}, \"port\":4040}");
                     String response = dis.readUTF();
-                    assertEquals("{\"data\":\"addressTest0\"}",response );
+                    System.out.println("Response 1: " + response);
 
                     socket = new Socket("localhost", 2021);
                     dos = new DataOutputStream(socket.getOutputStream());
                     dis = new DataInputStream(socket.getInputStream());
-                    dos.writeUTF("{\"method\":\"GET\", \"targetRoute\":\"/\", \"body\":null}");
-                     response = dis.readUTF();
-                    assertEquals("{\"nodeList\":[{\"address\":\"addressTest0\",\"servedFiles\":[],\"downloadedFilesCount\":0,\"uploadedFilesCount\":0}]}",response );
+                    dos.writeUTF("{\"method\":\"GET\", \"targetRoute\":\"/\", \"body\":null, \"port\":4040}");
+                    response = dis.readUTF();
+                    System.out.println("Response 2: " + response);
+                    socket = new Socket("localhost", 2021);
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    dis = new DataInputStream(socket.getInputStream());
+                    dos.writeUTF("{\"method\":\"ADD\", \"targetRoute\":\"/\", \"body\":{\"address\":\"addressTest1\"}, \"port\":4040}");
+                    response = dis.readUTF();
+                    System.out.println("Response 3: " + response);
+
+
+                    socket = new Socket("localhost", 2021);
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    dis = new DataInputStream(socket.getInputStream());
+                    dos.writeUTF("{\"method\":\"ADD\", \"targetRoute\":\"/addDownloadedFile\", \"body\":{\"address\":\"addressTest1\"}, \"port\":4040}");
+                    response = dis.readUTF();
+                    System.out.println("Response 4: " + response);
+
+                    socket = new Socket("localhost", 2021);
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    dis = new DataInputStream(socket.getInputStream());
+                    dos.writeUTF("{\"method\":\"ADD\", \"targetRoute\":\"/addServedFile\", \"body\":{\"fileName\":\"file1\"}, \"port\":4040}");
+                    response = dis.readUTF();
+                    System.out.println("Response 4.5: " + response);
+
+
+                    socket = new Socket("localhost", 2021);
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    dis = new DataInputStream(socket.getInputStream());
+                    dos.writeUTF("{\"method\":\"GET\", \"targetRoute\":\"/\", \"body\":null, \"port\":4040}");
+                    response = dis.readUTF();
+                    System.out.println("Response 5: " + response);
+
+
                     s.stop();
                 } catch (Exception e) {
                     e.printStackTrace();

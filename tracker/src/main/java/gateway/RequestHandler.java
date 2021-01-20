@@ -44,6 +44,7 @@ public class RequestHandler extends Thread {
 
     private Response getResponse(Request request) {
         RequestRouter router = RequestRouter.getInstance();
+        request.setAddress(this.socket.getInetAddress().getHostAddress() + ":" + request.getPort());
         return router.route(request);
     }
 

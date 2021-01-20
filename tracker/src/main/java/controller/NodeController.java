@@ -6,12 +6,14 @@ import protocol.RequestBody;
 import protocol.dto.NodeInputDto;
 import protocol.dto.NodeListDto;
 import protocol.Request;
+import protocol.dto.ServedFileDto;
 import protocol.dto.StringDto;
 import service.NodeService;
 
 public class NodeController extends Controller {
     private static volatile NodeController instance;
     private final NodeService service;
+
     private NodeController() {
         this.service = NodeService.getInstance();
     }
@@ -23,12 +25,32 @@ public class NodeController extends Controller {
     }
 
     @GetRequest("/")
-    public NodeListDto getAllNodesData(Request request){
+    public NodeListDto getAllNodesData(Request request) {
         return this.service.getAllNodesData();
     }
+
     @PostRequest("/")
-    public StringDto addNode(Request request){
-        String id = this.service.addNode(RequestBody.parse(NodeInputDto.class, request.getBody()));
+    public StringDto addNode(Request request) {
+        NodeInputDto dto = RequestBody.parse(NodeInputDto.class, request.getBody());
+        dto.setAddress(request.getAddress());
+        String id = this.service.addNode(dto);
         return new StringDto(id);
+    }
+
+    @PostRequest("/addDownloadedFile")
+    public void addDownloaded(Request request) {
+        this.service.addDownloaded(request.getAddress());
+    }
+
+    @PostRequest("/addUploadedFile")
+    public void addUploaded(Request request) {
+        this.service.addUploaded(request.getAddress());
+    }
+
+
+    @PostRequest("/addServedFile")
+    public void addServedFile(Request request) {
+        ServedFileDto dto = RequestBody.parse(ServedFileDto.class, request.getBody());
+        this.service.addServedFile(dto, request.getAddress());
     }
 }

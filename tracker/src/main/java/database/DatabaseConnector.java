@@ -70,8 +70,20 @@ public class DatabaseConnector {
         return list;
     }
 
+    public <T> void addFile(Node object, String name){
+        Session session = configuration.buildSessionFactory(serviceRegistry).openSession();
+        Transaction transaction = session.beginTransaction();
+        object = session.get(Node.class, object.getAddress());
+        object.addServedFile(name);
+        transaction.commit();
+    }
+    public <T> void update(T object, String id){
+        Session session = configuration.buildSessionFactory(serviceRegistry).openSession();
+        Transaction transaction = session.beginTransaction();
 
-
+        session.merge(id, object);
+        transaction.commit();
+    }
     public <T> T loadOneById(Class<T> type, String id){
         Session session = configuration.buildSessionFactory(serviceRegistry).openSession();
         Transaction transaction = session.beginTransaction();

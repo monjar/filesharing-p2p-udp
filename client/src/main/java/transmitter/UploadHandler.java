@@ -3,13 +3,16 @@ package transmitter;
 
 import config.Configs;
 import file.FileHandler;
+import trackerapi.TrackerConnector;
+import util.DataHelpers;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Arrays;
 
-public class UploadHandler extends Thread{
+public class UploadHandler extends Thread {
     private final String fileName;
     private final FileHandler fileHandler;
     private final DatagramSocket socket;
@@ -27,14 +30,14 @@ public class UploadHandler extends Thread{
     }
 
 
-
     @Override
     public void run() {
         super.run();
         try {
             this.sendFileMetaData();
             this.sendFileData();
-        }catch (IOException e){
+            TrackerConnector.getInstance().addUploadedFile();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -49,9 +52,15 @@ public class UploadHandler extends Thread{
 
     public void sendFileData() throws IOException {
         for (int i = 0; i < Math.ceil(fileHandler.sizeInBytes() / (float) PACKET_SIZE); i++) {
-            byte[] buf2 = fileHandler.readByteFromFile(i * PACKET_SIZE, PACKET_SIZE);
-            DatagramPacket packet = new DatagramPacket(buf2, 0, buf2.length, destAddr, destPort);
+            byte[] indexBuffer = DataHelpers.intToByteArr(i);
+            byte[] dataBuff = fileHandler.readByteFromFile(i * PACKET_SIZE, PACKET_SIZE);
+            byte[] resBuf = new byte[indexBuffer.length + dataBuff.length];
+            System.arraycopy(indexBuffer, 0, resBuf, 0, indexBuffer.length);
+            System.arraycopy(dataBuff, 0, resBuf, indexBuffer.length, dataBuff.length);
+            DatagramPacket packet = new DatagramPacket(resBuf, 0, resBuf.length, destAddr, destPort);
             socket.send(packet);
         }
     }
+
+
 }

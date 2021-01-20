@@ -2,7 +2,9 @@ package database.model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -18,8 +20,8 @@ public class Node implements Serializable {
     @Id
     private String address;
 
-    @ElementCollection
-    Set<String> servedFiles = new HashSet<String>();
+    @ElementCollection( targetClass = java.lang.String.class)
+    List<String> servedFiles = new ArrayList<>();
 
     private int downloadedFilesCount;
     private int uploadedFilesCount;
@@ -33,11 +35,11 @@ public class Node implements Serializable {
         this.address = address;
     }
 
-    public Set<String> getServedFiles() {
+    public List<String> getServedFiles() {
         return servedFiles;
     }
 
-    public void setServedFiles(Set<String> servedFiles) {
+    public void setServedFiles(List<String> servedFiles) {
         this.servedFiles = servedFiles;
     }
 
@@ -55,5 +57,9 @@ public class Node implements Serializable {
 
     public void setUploadedFilesCount(int uploadedFilesCount) {
         this.uploadedFilesCount = uploadedFilesCount;
+    }
+
+    public void  addServedFile(String filename){
+        this.servedFiles.add(filename);
     }
 }

@@ -2,6 +2,7 @@ import config.ConfigLoader;
 import modes.ClientMode;
 import modes.ModeManager;
 import receiver.Receiver;
+import trackerapi.TrackerConnector;
 import transmitter.Transmitter;
 
 import java.io.IOException;
@@ -9,13 +10,25 @@ import java.io.IOException;
 public class App {
 
     public static void main(String[] args) {
+        TrackerConnector.getInstance().registerNode();
         ModeManager modeManager = new ModeManager();
         modeManager.showHelp();
-        ClientMode clientMode = modeManager.getMode();
+
+        while (true){
+            TrackerConnector.getInstance().getAllData();
+            ClientMode clientMode = modeManager.getMode();
+            Thread t = new Thread(clientMode);
+            t.start();
+            waitASec();
+        }
+
+    }
+
+    public static void waitASec(){
         try {
-            clientMode.startMode();
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

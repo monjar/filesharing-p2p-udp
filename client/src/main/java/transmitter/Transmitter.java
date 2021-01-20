@@ -4,6 +4,7 @@ import config.ConfigLoader;
 import config.Configs;
 import file.FileHandler;
 import modes.ClientMode;
+import trackerapi.TrackerConnector;
 import util.DataHelpers;
 
 import java.io.IOException;
@@ -23,12 +24,14 @@ public class Transmitter implements ClientMode {
     @Override
     public void run() {
 
+        try {
+            serveFile();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
     }
 
-    @Override
-    public void startMode() throws IOException {
-        serveFile();
-    }
+
 // TODO add multiple files
     public Transmitter(String fileName ) {
         ConfigLoader configLoader = new ConfigLoader("config.properties");
@@ -41,10 +44,12 @@ public class Transmitter implements ClientMode {
     }
 
     public void serveFile() throws IOException {
+
         FileHandler fileHandler = new FileHandler(fileName);
         DatagramSocket socket = new DatagramSocket(UDP_PORT, InetAddress.getByName(UDP_IP_LISTEN));
-        byte[] buf = new byte[RECEIVE_SIZE];
+        byte[] buf = new byte[RECEIVE_SIZE + 4];
         DatagramPacket packet = new DatagramPacket(buf, 0, buf.length);
+        TrackerConnector.getInstance().addServedFile(fileName);
         while (isServing) {
             waitForValidRequest(fileName, socket, buf, packet);
             int destPort = packet.getPort();
@@ -59,6 +64,7 @@ public class Transmitter implements ClientMode {
     private void waitForValidRequest(String file, DatagramSocket socket, byte[] buf, DatagramPacket packet) throws IOException {
         socket.receive(packet);
         String req_file = DataHelpers.parseBytes(buf);
+        System.out.println(req_file);
         while (areRequestsWrong(file, req_file)) {
             socket.receive(packet);
             req_file = DataHelpers.parseBytes(buf);

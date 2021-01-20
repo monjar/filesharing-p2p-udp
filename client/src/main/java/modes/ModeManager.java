@@ -21,6 +21,7 @@ public class ModeManager {
     }
 
     public ClientMode getMode(){
+        System.out.println("Enter Command:");
         ClientMode clientMode;
         String command = terminalInput.nextLine();
         //TODO make this more flexible:

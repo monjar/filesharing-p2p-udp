@@ -10,6 +10,7 @@ import static org.junit.Assert.*;
 
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class ReceiverTest {
     private static String UDP_IP_LISTEN;
@@ -42,7 +43,7 @@ public class ReceiverTest {
                         DatagramPacket packet = new DatagramPacket(buf, 0, buf.length);
                         socket.receive(packet);
                         String req_file = DataHelpers.parseBytes(buf);
-                        assertEquals(req_file, REQUEST_PREFIX + "hi.txt");
+                        assertEquals(REQUEST_PREFIX + "hi.txt", req_file );
                         buf = "FOUND TEST CLIENT".getBytes(StandardCharsets.UTF_8);
                         packet = new DatagramPacket(buf, 0, buf.length, packet.getAddress(), packet.getPort());
                         socket.send(packet);
@@ -72,6 +73,7 @@ public class ReceiverTest {
 
             final Receiver receiver = new Receiver("test.txt");
             final String data = "This is \ndata of the @@@data@@@data file.";
+            FileHandler fileHandler2 = new FileHandler("test.txt");
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     try {
@@ -83,10 +85,13 @@ public class ReceiverTest {
                         buf = ("FOUND FILE " + "test.txt" + " - size: " + data.length()).getBytes();
                         packet = new DatagramPacket(buf, 0, buf.length, packet.getAddress(), packet.getPort());
                         socket.send(packet);
-                        byte[] buf2 = data.getBytes();
-                        DatagramPacket ppacket = new DatagramPacket(buf2, 0, buf2.length, packet.getAddress(), packet.getPort());
+                        byte[] indexBuffer = DataHelpers.intToByteArr(0);
+                        byte[] dataBuff = data.getBytes();
+                        byte[] resBuf = new byte[indexBuffer.length + dataBuff.length];
+                        System.arraycopy(indexBuffer, 0, resBuf, 0, indexBuffer.length);
+                        System.arraycopy(dataBuff, 0, resBuf, indexBuffer.length, dataBuff.length);
+                        DatagramPacket ppacket = new DatagramPacket(resBuf, 0, resBuf.length, packet.getAddress(), packet.getPort());
                         socket.send(ppacket);
-
                         socket.close();
 
                     } catch (Exception e) {
@@ -98,7 +103,6 @@ public class ReceiverTest {
             t.start();
             Thread.sleep(100);
             receiver.receiveFile(ClientMode.Receiver.DOWNLOAD);
-            FileHandler fileHandler2 = new FileHandler("test.txt");
             byte[] actual = fileHandler2.readByteFromFile(0, (int) fileHandler2.sizeInBytes());
             assertEquals(data, DataHelpers.parseBytes(actual));
 
