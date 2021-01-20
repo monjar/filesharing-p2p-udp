@@ -48,7 +48,6 @@ public class Transmitter implements ClientMode {
     }
 
     public void serveFile() throws IOException {
-
         DatagramSocket socket = new DatagramSocket(UDP_PORT, InetAddress.getByName(UDP_IP_LISTEN));
         byte[] buf = new byte[RECEIVE_SIZE + 4];
         DatagramPacket packet = new DatagramPacket(buf, 0, buf.length);
@@ -59,7 +58,7 @@ public class Transmitter implements ClientMode {
             UploadHandler handler = new UploadHandler(fileName, socket, destIp, destPort);
             handler.start();
         }
-//        socket.close();
+        socket.close();
     }
 
     public void addFile(String fileName) {
@@ -80,7 +79,6 @@ public class Transmitter implements ClientMode {
         }
         return req_file.substring(REQUEST_PREFIX.length());
     }
-    //file.split("/")[1]
 
     private boolean areRequestsWrong(String req_file) {
         return !req_file.startsWith(REQUEST_PREFIX) || !files.contains(req_file.substring(REQUEST_PREFIX.length()));

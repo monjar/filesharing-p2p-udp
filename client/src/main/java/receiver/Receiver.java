@@ -62,7 +62,6 @@ public class Receiver implements ClientMode {
     }
 
     private String downloadFile(DatagramSocket udpSocket, String fileName) throws IOException {
-
         String searchResult = getFileMetaData(udpSocket);
         System.out.println(searchResult);
         int fileSize = Integer.parseInt(searchResult.split("- size: ")[1]), downloadedBytes = 0;
@@ -73,16 +72,21 @@ public class Receiver implements ClientMode {
             downloadedBytes += currentBufferSize - 4;
             DatagramPacket receivePacket = new DatagramPacket(receive_bytes, receive_bytes.length);
             udpSocket.receive(receivePacket);
-            byte[] indexBytes = new byte[4];
-            System.arraycopy(receive_bytes, 0, indexBytes, 0, indexBytes.length);
-            int index = DataHelpers.byteArrToInt(indexBytes);
-            System.out.println("Got part: " + index);
-            byte[] dataBytes = new byte[receive_bytes.length - indexBytes.length];
-            System.arraycopy(receive_bytes, indexBytes.length, dataBytes, 0, dataBytes.length);
+            byte[] dataBytes = parseIncomingBytes(receive_bytes);
             fileHandler.writeToFile(dataBytes, true);
         }
         fileHandler.closeWriter();
         return "File downloaded completely";
+    }
+
+    private byte[] parseIncomingBytes(byte[] receive_bytes) {
+        byte[] indexBytes = new byte[4];
+        System.arraycopy(receive_bytes, 0, indexBytes, 0, indexBytes.length);
+        int index = DataHelpers.byteArrToInt(indexBytes);
+        System.out.println("Got part: " + index);
+        byte[] dataBytes = new byte[receive_bytes.length - indexBytes.length];
+        System.arraycopy(receive_bytes, indexBytes.length, dataBytes, 0, dataBytes.length);
+        return dataBytes;
     }
 
 
